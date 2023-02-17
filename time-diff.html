@@ -1,0 +1,207 @@
+<!--
+ * @ Author: 阿福
+ * @ Create Time: 2023-02-17 13:49:56
+ * @ Modified by: Your name
+ * @ Modified time: 2023-02-17 15:11:10
+ * @ Description: 计算时间差
+ -->
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>计算时间差</title>
+  </head>
+  <body>
+    <p>
+      <label for="start-time"
+        >开始时间：<input id="start-time" type="datetime-local"
+      /></label>
+      <button onclick="setStartTimeNow()">现在时间</button>
+    </p>
+
+    <p>
+      <label for="end-time"
+        >结束时间：<input id="end-time" type="datetime-local"
+      /></label>
+      <button onclick="setEndTime(0)">明天7:30</button>
+      <button onclick="setEndTime(1)">明天8:00</button>
+      <button onclick="setEndTime(2)">明天8:30</button>
+      <button onclick="setEndTime(3)">明天9:00</button>
+    </p>
+
+    <p>时间差为：<span class="diff-time"></span></p>
+
+    <p>
+      <button onclick="calculate()">计算</button>
+    </p>
+
+    <script>
+      // 日期格式化 yyyy-MM-dd hh:mm:ss
+      function formatDate(date, format = "yyyy-MM-dd hh:mm:ss") {
+        let fmt = format;
+        const options = {
+          "M+": date.getMonth() + 1,
+          "d+": date.getDate(),
+          "h+": date.getHours(),
+          "m+": date.getMinutes(),
+          "s+": date.getSeconds(),
+        };
+
+        if (/(y+)/.test(fmt)) {
+          fmt = fmt.replace(
+            RegExp.$1,
+            `${date.getFullYear()}`.substr(4 - RegExp.$1.length)
+          );
+        }
+
+        Object.keys(options).forEach((keyItem) => {
+          if (new RegExp(`(${keyItem})`).test(fmt)) {
+            fmt = fmt.replace(
+              RegExp.$1,
+              RegExp.$1.length === 1
+                ? options[keyItem]
+                : `00${options[keyItem]}`.substr(`${options[keyItem]}`.length)
+            );
+          }
+        });
+
+        return fmt;
+      }
+
+      // 快速设置开始时间为正在时间
+      function setStartTimeNow() {
+        const startTimeNode = document.querySelector("#start-time");
+
+        startTimeNode.value = formatDate(new Date(), "yyyy-MM-ddThh:mm");
+      }
+
+      // 快速设置结束时间
+      function setEndTime(index) {
+        const endTimeNode = document.querySelector("#end-time");
+        const actions = {
+          0() {
+            const now = new Date();
+            now.setHours(7);
+            now.setMinutes(30);
+            now.setSeconds(0);
+            now.setDate(now.getDate() + 1);
+
+            return now;
+          },
+          1() {
+            const now = new Date();
+            now.setHours(8);
+            now.setMinutes(0);
+            now.setSeconds(0);
+            now.setDate(now.getDate() + 1);
+
+            return now;
+          },
+          2() {
+            const now = new Date();
+            now.setHours(8);
+            now.setMinutes(30);
+            now.setSeconds(0);
+            now.setDate(now.getDate() + 1);
+
+            return now;
+          },
+          3() {
+            const now = new Date();
+            now.setHours(9);
+            now.setMinutes(0);
+            now.setSeconds(0);
+            now.setDate(now.getDate() + 1);
+
+            return now;
+          },
+        };
+
+        endTimeNode.value = formatDate(actions[index](), "yyyy-MM-ddThh:mm");
+      }
+
+      // 时间差格式化
+      function formatTimeDiff(diff) {
+        const newDiff = Math.abs(diff);
+        const oneDay = 24 * 60 * 60 * 1000;
+        const oneHour = 60 * 60 * 1000;
+        const oneMinute = 60 * 1000;
+        const oneSecond = 1000;
+        let remainder = newDiff;
+        let days = 0;
+        let hours = 0;
+        let minutes = 0;
+        let seconds = 0;
+
+        if (diff === 0) {
+          return `0天0时0分0秒`;
+        }
+
+        // 计算天数
+        if (remainder >= oneDay) {
+          days = parseInt(remainder / oneDay, 10);
+          remainder = remainder % oneDay;
+        }
+
+        // 计算小时数
+        if (remainder >= oneHour) {
+          hours = parseInt(remainder / oneHour, 10);
+          remainder = remainder % oneHour;
+        }
+
+        // 计算分钟数
+        if (remainder >= oneMinute) {
+          minutes = parseInt(remainder / oneMinute, 10);
+          remainder = remainder % oneMinute;
+        }
+
+        // 计算秒数
+        if (remainder >= oneSecond) {
+          seconds = parseInt(remainder / oneSecond, 10);
+          remainder = remainder % oneSecond;
+        }
+
+        const daysText = days > 0 ? days + "天" : "";
+        const hoursText = hours > 0 ? hours + "时" : "";
+        const minutesText = minutes > 0 ? minutes + "分" : "";
+        const secondsText = seconds > 0 ? seconds + "秒" : "";
+        const result = `${daysText}${hoursText}${minutesText}${secondsText}`;
+
+        return `${diff < 0 ? "-" : ""}${result}`;
+      }
+
+      // 计算时间差
+      function calculate() {
+        const startTimeNode = document.querySelector("#start-time");
+        const endTimeNode = document.querySelector("#end-time");
+
+        const startTime = startTimeNode.value;
+        const endTime = endTimeNode.value;
+
+        if (!startTime) {
+          alert("请选择开始时间");
+          return;
+        }
+
+        if (!endTime) {
+          alert("请选择结束时间");
+          return;
+        }
+
+        const startTimeDate = new Date(startTime);
+        const endTimeDate = new Date(endTime);
+        const diff = endTimeDate - startTimeDate;
+
+        if (diff < 0) {
+          alert("结束时间不能小于开始时间");
+          return;
+        }
+
+        document.querySelector(".diff-time").innerText = formatTimeDiff(diff);
+      }
+    </script>
+  </body>
+</html>
